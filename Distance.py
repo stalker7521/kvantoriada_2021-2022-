@@ -23,6 +23,7 @@ class Distance:
         return length
 
     def angle(self):
+        """This function can be used for finding angel between OY and vector moving (+) for first and forth quadrant"""
         local_lat = self.lat2 - self.latMy
         angel = 90 - asin(local_lat/self.distance())
         if self.lonMy > self.lon2:
