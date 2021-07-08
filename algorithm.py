@@ -45,14 +45,14 @@ while True:
         while flag != weight:
             my_xy = my_gps()
             if ((my_xy[0] - MISTAKE_LAT) >= my_xy[0] <= (my_xy[0] + MISTAKE_LAT)) and ((my_xy[0] - MISTAKE_LON) >= my_xy[0] <= (my_xy[0] + MISTAKE_LON)):
-                flag += 1  # if we are on the point-target
-            else:  # if we aren`t on the point-target
+                flag += 1   # if we are on the point-target
+            else:           # if we aren`t on the point-target
                 RotateAngel = Distance(my_gps()[0], my_gps()[1], POINTS[flag][0], POINTS[flag][1]).angle()
                 while RotateAngel != my_angel():
                     moving()
                     turn()
                 turn_zero()
-            tm.sleep(1)  # time of delay
+        tm.sleep(1)         # time of delay
         stopper()
 
 
