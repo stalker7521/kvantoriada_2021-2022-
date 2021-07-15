@@ -5,7 +5,7 @@ import string
 import pynmea2
 from mpu9250 import *
 
-POINTS = [(0, 0), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7)]  # list with tuples (structure: (latitude, longitude)
+POINTS = [(43.400081,39.964251), (43.400585,39.963003), (43.399175,39.963610), (43.398381,39.963590), (43.398788,39.964401), (43.399534,39.964645), (43.400143,39.965468)]  # list with tuples (structure: (latitude, longitude)
 MISTAKE_LAT = 2                                                    # available mistake of the latitude
 MISTAKE_LON = 2                                                    # available mistake of the longitude
 MISTAKE_DEG = 2                                                    # available mistake of the degrees
@@ -56,11 +56,15 @@ def turn_zero():
     pass
 
 #-----------------------------------------------------------------------------------
-mpu = MPU9250()
-mpu.initialize()
+mpu = MPU9250()                                    # prosto, suka nado
+mpu.initialize()                                   # prosto, suka nado
+mpu.gyro_offs =  {'y': -5, 'x': 158, 'z': -100}    # prosto, suka nado
+mpu.accel_offs =  {'y': 102, 'x': -34, 'z': -364}  # prosto, suka nado
 compas = AK8963()
 compas.initialize()
 compas.get_calibrated()
+delay = 3
+time.sleep(1)
 #-----------------------------------------------------------------------------------
 while True:
     weight = len(POINTS)
@@ -79,6 +83,7 @@ while True:
                     print('my angel - ', my_angel(), 'rotate angel - ', RotateAngel)
                     moving()
                     turn()
+                time.sleep(delay)
                 turn_zero()
                 print("ending of turning")
         stopper()
