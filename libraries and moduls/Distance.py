@@ -2,7 +2,7 @@ from math import *
 
 
 class Distance:
-    def __init__(self, latitudeMy=0, longitudeMy=0, latitude2=0, longitude2=0, earth=6371):
+    def __init__(self, latitudeMy=0.0, longitudeMy=0.0, latitude2=0.0, longitude2=0.0, earth=6371):
         """Rad - means angel in radians, earth - means radius of Earth"""
         self.latMy = latitudeMy
         self.lonMy = longitudeMy
@@ -17,15 +17,38 @@ class Distance:
     def radians(self):
         return {"lat1": self.lat1Rad, "lon1": self.lon1Rad, "lat2": self.lat2Rad, "lon2": self.lon2Rad}
 
-    def distance(self):
+    def distance_main(self):
         """length - distance between two points"""
-        length = self.eaR * 2 * asin(sqrt((sin((self.lat1Rad-self.lat2Rad)/2))**2 + cos(self.lat1Rad) * cos(self.lat2Rad)*(sin((self.lon1Rad-self.lon2Rad)/2))**2))
+        length = 1000*self.eaR * 2 * asin(sqrt((sin((self.lat1Rad-self.lat2Rad)/2))**2 + cos(self.lat1Rad) * cos(self.lat2Rad)*(sin((self.lon1Rad-self.lon2Rad)/2))**2))
+        return length
+
+    def distance_lat(self):
+        """length - distance between two points"""
+        length = 1000*self.eaR * 2 * asin(sqrt((sin((self.lat1Rad-self.lat2Rad)/2))**2))
         return length
 
     def angle(self):
         """This function can be used for finding angel between OY and vector moving (+) for first and forth quadrant"""
-        local_lat = self.lat2 - self.latMy
-        angel = 90 - asin(local_lat/self.distance())
-        if self.lonMy > self.lon2:
-            angel = 360 - angel
+        dist_lat = self.distance_lat()
+        main_dist = self.distance_main()
+        angel = degrees(asin(dist_lat/main_dist))
+        if (self.lonMy > self.lon2) and (self.latMy > self.lat2):
+            angel = 270 - angel
+        elif (self.lonMy < self.lon2) and (self.latMy < self.lat2):
+            angel = 90 - angel
+        elif (self.lonMy > self.lon2) and (self.latMy < self.lat2):
+            angel = 270 + angel
+        elif (self.lonMy < self.lon2) and (self.latMy > self.lat2):
+            angel = 90 + angel
+        elif (self.lonMy > self.lon2) and (self.latMy == self.lat2):
+            angel = 270
+        elif (self.lonMy < self.lon2) and (self.latMy == self.lat2):
+            angel = 90
+        elif (self.lonMy == self.lon2) and (self.latMy > self.lat2):
+            angel = 180
+        elif (self.lonMy == self.lon2) and (self.latMy < self.lat2):
+            angel = 0
         return angel
+# 56.846312308, 60.597864744, 56.8470502927, 60.599220277 ++++ 56.8470502927, 60.599220277, 56.846312308, 60.597864744
+d = Distance(43.400081, 39.964251, 43.400143, 39.965468)
+print(d.angle())
