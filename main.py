@@ -1,16 +1,35 @@
-# This is a sample Python script.
+# TODO for tests (in sirius)
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from module import *
+import Distance
+import time
+
+cord = (1, 1)
+flag = False
+ang_m = 1
+lat_lon_m = 0.001
+compass = Compass()
+while True:
+    if flag == True:
+        break
+    lat, lon = midl_cord(4, True)  # 5 sec
+    if ((lat - lat_lon_m) < cord[0] < (lat - lat_lon_m)) and ((lon - lat_lon_m) < cord[0] < (lon - lat_lon_m)):
+    dist = Distance(lat, lon, cord[0], cord[1])
+    angel = dist.angel()
+    while ((angel - ang_m) < compass.my_angel() < (angel + ang_m)):
+        print('крутись')
+        print(compass.my_angel())
+        time.sleep(1)             # 1 sec
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+# print('start')
+# a = 0
+# d = 3
+# while not((14 - d)< a <(14 + d)):
+#     time.sleep(1)
+    # a += 1
+    # print(a)
+# print('end')

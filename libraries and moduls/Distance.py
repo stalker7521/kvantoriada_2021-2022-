@@ -23,7 +23,7 @@ class Distance:
         return length
 
     def distance_lat(self):
-        """length - distance between two points"""
+        """length - distance between two points (if lon the same)"""
         length = 1000*self.eaR * 2 * asin(sqrt((sin((self.lat1Rad-self.lat2Rad)/2))**2))
         return length
 
