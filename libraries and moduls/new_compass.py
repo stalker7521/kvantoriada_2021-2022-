@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-from mpu6050 import *
 from mpu9250 import *
 
 def hmc5883l_read():
@@ -8,19 +7,19 @@ def hmc5883l_read():
 	mpu = MPU9250()
 	mpu.initialize()
 
-	compas = AK8963()
-	compas.initialize()
+	compass = AK8963()
+	compass.initialize()
 
 	# Set calibration data
 	mpu.gyro_offs = {'y': -5, 'x': 158, 'z': -100}
 	mpu.accel_offs = {'y': 102, 'x': -34, 'z': -364}
 
-	compas.calibration_matrix = [
+	compass.calibration_matrix = [
 		[1.869609, 0.038154, 0.012464],
 		[0.038154, 1.660677, 0.042212],
 		[0.012464, 0.042212, 1.750332]
 	]
-	compas.bias = [20.723669, 117.630557, -240.218174]
+	compass.bias = [20.723669, 117.630557, -240.218174]
 
 	accel_data = mpu.get_accel()
 	x_rotation = mpu.get_x_rotation(accel_data)
@@ -29,30 +28,29 @@ def hmc5883l_read():
 	last_time = time.time()
 	alpha = 0.85
 
-	while True:
-		new_time = time.time()
-		gyro_data = mpu.get_gyro()
-		accel_data = mpu.get_accel()
+	new_time = time.time()
+	gyro_data = mpu.get_gyro()
+	accel_data = mpu.get_accel()
 
-		dt = new_time - last_time
-		last_time = new_time
-		gyro_angle_x = gyro_data['x']*dt + x_rotation
-		if gyro_angle_x > 360:
-			gyro_angle_x -= 360
-		if gyro_angle_x < 0:
-			gyro_angle_x = 360 + gyro_angle_x
+	dt = new_time - last_time
+	last_time = new_time
+	gyro_angle_x = gyro_data['x']*dt + x_rotation
+	if gyro_angle_x > 360:
+		gyro_angle_x -= 360
+	if gyro_angle_x < 0:
+		gyro_angle_x = 360 + gyro_angle_x
 
-		accel_angle_x = mpu.get_x_rotation(accel_data)
+	accel_angle_x = mpu.get_x_rotation(accel_data)
 
-		if abs(gyro_angle_x - accel_angle_x) > 180:
-			gyro_angle_x = accel_angle_x
+	if abs(gyro_angle_x - accel_angle_x) > 180:
+		gyro_angle_x = accel_angle_x
 
-		x_rotation = alpha*gyro_angle_x + (1.0 - alpha)*mpu.get_x_rotation(accel_data)
+	x_rotation = alpha*gyro_angle_x + (1.0 - alpha)*mpu.get_x_rotation(accel_data)
 
-		gyro_angle_y = gyro_data['y']*dt + y_rotation
-		y_rotation = alpha*gyro_angle_y + (1.0 - alpha)*mpu.get_y_rotation(accel_data)
+	gyro_angle_y = gyro_data['y']*dt + y_rotation
+	y_rotation = alpha*gyro_angle_y + (1.0 - alpha)*mpu.get_y_rotation(accel_data)
 
-		rotation = 360 - compass.heading(x_rotation, y_rotation)
-		time.sleep(0.01)
+	rotation = 360 - compass.heading(x_rotation, y_rotation)
+	time.sleep(0.01)
 
-		return rotation
+	return rotation
