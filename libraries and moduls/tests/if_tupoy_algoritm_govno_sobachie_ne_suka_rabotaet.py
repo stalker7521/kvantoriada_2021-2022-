@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 from mpu9250 import *
 import time
 
