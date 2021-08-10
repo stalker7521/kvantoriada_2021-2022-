@@ -12,3 +12,4 @@ mpu.gyro_offs = {'y': -5, 'x': 158, 'z': -100}
 mpu.accel_offs = {'y': 102, 'x': -34, 'z': -364}  
 compas = AK8963()  
 compas.initialize()
+---
