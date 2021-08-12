@@ -8,13 +8,14 @@ import multiprocessing
 import os
 
 
+########################################################################
 class Compass:
 
     def __init__(self):
         self.mpu = MPU9250()
         self.mpu.initialize()
-        self.mpu.gyro_offs = {'y': -5, 'x': 158, 'z': -100}
-        self.mpu.accel_offs = {'y': 102, 'x': -34, 'z': -364}
+        self.mpu.gyro_offs = {'y': 29, 'x': 143, 'z': -11}
+        self.mpu.accel_offs = {'y': -160, 'x': -358, 'z': 8472}
         self.compass = AK8963()
         self.compass.initialize()
         self.compass.get_calibrated()
@@ -23,16 +24,17 @@ class Compass:
     def my_angel(self):
         """function with magnetometer (getting the angel from module)"""
         angel = self.compass.heading()
-        #print(angel)
         if angel < 0:
-            print(angel)
+            #print(angel)
             angel = 360 + angel
         return angel
         
     def colibrating (self, max_iter):
         self.compass.callibration(max_iter)
+########################################################################
 
-def my_gps(checker):
+def my_gps(checker):   
+    """function for getting gps cords"""
     inf = False
     cord = ()
     while inf == False:
@@ -70,30 +72,45 @@ def midl_cord(size, checker):
     mid_lat = sum(all_lat)/size
     mid_lon = sum(all_lon)/size
     return mid_lat, mid_lon
-
+########################################################################
 
 class Arduino:
-    def __init__(self, bot = 9600, port = '/dev/ttyACM0', timeout_1 = 1, dlin=4):
+    
+    def __init__(self, bot = 9600, port = '/dev/ttyUSB0', timeout_1 = 1, dlin=4):
         self.ser = serial.Serial(port, bot, timeout=timeout_1)
         self.ser.flush()
+        self.TURN_RIGHT = '3'
+        self.TURN_LEFT = '2'
+        self.TURN_ZERO = '4'
+        self.STOP = '0'
+        self.GO = '1'
         for i in range(dlin):
             self.ser.write('9'.encode('ascii'))
             time.sleep(1)
         
     def stopper(self):
-        self.ser.write('0'.encode('ascii'))
+        self.ser.write(self.STOP.encode('ascii'))
 
     def moving(self):
         """arduino controlling function (for start motion)"""
-        self.ser.write('1'.encode('ascii'))
+        tm = time.time()
+        self.ser.write(self.GO.encode('ascii'))
+        print(time.time() - tm)
+        print('ok')
 
-    def turn(self):
+    def turn_right(self):
         """arduino controlling function (for starting rotation)"""
-        self.ser.write('2'.encode('ascii'))
+        self.ser.write(self.TURN_RIGHT.encode('ascii'))
+        
+    def turn_left(self):
+        """arduino controlling function (for starting rotation)"""
+        self.ser.write(self.TURN_LEFT.encode('ascii'))
 
     def turn_zero(self):
         """arduino controlling function (for returning wheels at the default state)"""
-        self.ser.write('3'.encode('ascii'))
+        self.ser.write(self.TURN_ZERO.encode('ascii'))
+        
+########################################################################
         
 class Arduino_send:
     
@@ -104,27 +121,34 @@ class Arduino_send:
         time.sleep(1)
         
     def sender_to_ar(self):
-        print(os.getpid())
-        ard = Arduino(dlin=2)
-        time.sleep(1)
-        while True:
-            if self.q.empty() == False:
-                out = self.q.get()
-                print(out)
-                if out == 'stop':
-                    ard.stopper()
-                    time.sleep(1)
-                elif out == 'go':
-                    ard.moving()
-                    time.sleep(1)
-                elif out == 'turn':
-                    ard.turn()
-                    time.sleep(1)
-                elif out == 'turn_zero':
-                    ard.turn_zero()
-                    time.sleep(1)
-                    
+        try:
+            print(os.getpid())
+            ard = Arduino(dlin=2)
+            time.sleep(1)
+            while True:
+                if self.q.empty() == False:
+                    out = self.q.get()
+                    print(out)
+                    if out == 'stop':
+                        ard.stopper()
+                        time.sleep(0.5)
+                    elif out == 'go':
+                        ard.moving()
+                        time.sleep(0.5)
+                    elif out == 'turn_left':
+                        ard.turn_left()
+                        time.sleep(0.5)
+                    elif out == 'turn_right':
+                        ard.turn_right()
+                        time.sleep(0.5)
+                    elif out == 'turn_zero':
+                        ard.turn_zero()
+                        time.sleep(0.5)
+        except:
+            print("problem")
+            
     def sender_to_q(self, info):
+        """ @info - 'stop' or 'go' or 'turn_right' or 'turn_left' or 'turn_zero' """
         #print(self.q.empty())
         if self.q.empty():
             self.q.put(info)
@@ -132,6 +156,6 @@ class Arduino_send:
     def killer(self):
         self.proc.terminate()
             
-        
+########################################################################
         
         

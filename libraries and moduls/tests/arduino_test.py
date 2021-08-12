@@ -26,12 +26,13 @@ import os
 from module import *
 
 ad = Arduino_send()
+time.sleep(1)
 nan = 0
 print(os.getpid())
 while True:
-	nan += 1
 	ad.sender_to_q("go")
-	time.sleep(4)
+	time.sleep(0.1)
+	nan += 1
 	print(nan)
 
 

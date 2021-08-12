@@ -137,8 +137,21 @@ class MPU9250:
 	MPU9250_ZA_OFFSET_H        = 0x7D
 	MPU9250_ZA_OFFSET_L        = 0x7E
 
-	gyro_offs =  {'y': -5, 'x': 158, 'z': -100}
-	accel_offs =  {'y': 0, 'x': 0, 'z': 0}
+	#gyro_offs =  {'y': -5, 'x': 158, 'z': -100}
+	#accel_offs =  {'y': 0, 'x': 0, 'z': 0}
+	
+	#gyro_offs =  {'y': -18, 'x': 184, 'z': -118}
+	#accel_offs =  {'y': 124, 'x': -3482, 'z': -136}
+	
+	#gyro_offs =  {'y': -16, 'x': 141, 'z': -46}
+	#accel_offs =  {'y': -4068, 'x': 4056, 'z': -116}
+	
+	#gyro_offs =  {'y': 4, 'x': 52, 'z': 68}
+    #accel_offs =  {'y': 440, 'x': -178, 'z': 8520} 
+	
+	gyro_offs =  {'y': 4, 'x': 52, 'z': 68}
+	accel_offs =  {'y': 440, 'x': -178, 'z': 8520}
+
 
 	# construct a new object with the I2C address of the MPU9250
 	def __init__(self, address = MPU9250_DEFAULT_ADDRESS):
@@ -201,6 +214,7 @@ class MPU9250:
 	def get_gyro_offs(self):
 		data_offs = {'x':0, 'y':0, 'z':0}
 		for num in range(0,100):
+			print(num)
 			data = self.get_gyro_raw();
 			data_offs['x']+=data['x'];
 			data_offs['y']+=data['y'];
@@ -340,13 +354,26 @@ class AK8963:
 	AK8963_ASAZ                = 0x12
 
 	#### Callibration data ###
-	calibration_matrix = [
-        [1.255127, 0.014581, 0.052281],
-		[0.014581, 1.264288, -0.038195],
-		[0.052281, -0.038195, 1.272811]
-        ]
-	bias = [147.853340, -40.104083, -212.134632]
+    #calibration_matrix = [
+    #   [1.869609, 0.038154, 0.012464],
+	#	[0.038154, 1.660677, 0.042212],
+	#	[0.012464, 0.042212, 1.750332]
+    #   ]
+	#bias = [20.723669, 117.630557, -240.218174]
+	
+	#calibration_matrix = [
+	#	[2.533604, 0.146101, -0.278374],
+	#	[0.146101, 2.744245, 0.329500],
+	#	[-0.278374, 0.329500, 2.301296],
+	#	]
+	#bias = [1899.915027, 464.646124, 3406.463992]
 
+	calibration_matrix = [  [2.610355, 0.101272, -0.088001],
+									[0.101272, 3.203865, 0.193186],
+									[-0.088001, 0.193186, 3.679827]
+								]
+	bias = [1627.170389, 454.359500, 3228.085174]
+	
         #################################
 
 	# construct a new object with the I2C address of the MPU9250
@@ -394,14 +421,15 @@ class AK8963:
 			hofl = self.bus.read_byte_data(self.address, self.AK8963_ST2) & 0x08
 		return {'x':round(self.X), 'y':round(self.Y), 'z':round(self.Z)}
 
-	def callibration(self):
-		f = open('', 'w')
+	def callibration(self, max_iter):
+		f = open('colibrating_matrix_new', 'w')
 		print "###############################################"
 		print "Please twirl the AK8963 around a minute..."
 		print "The experimental data will stored to AK8963_calibr.txt file"
 		print "Please use this file to calculate calibration matrix by Magneto software."
 		print "###############################################"
-		for num in range(0,500):
+		for num in range(0,max_iter):
+			print(num)
 			data = self.get_raw()
 			f.write(str(data['x'])+'\t'+str(data['y'])+'\t'+str(data['z'])+'\n')
 			time.sleep(0.125)
