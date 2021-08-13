@@ -20,22 +20,6 @@ if __name__ == '__main__':
 		print(1)
 		time.sleep(1)
 """
-import time
-import multiprocessing
-import os
-from module import *
-
-ad = Arduino_send()
-time.sleep(1)
-nan = 0
-print(os.getpid())
-while True:
-	ad.sender_to_q("go")
-	time.sleep(0.1)
-	nan += 1
-	print(nan)
-
-
 """
 print(os.getpid())
 
@@ -59,4 +43,22 @@ while True:
 	print(1)
 	time.sleep(1)
 """
+import time
+import multiprocessing
+import os
+from module import *
+
+ad = Arduino_send()
+#time.sleep(1)
+nan = 0
+print(os.getpid())
+while True:
+	ad.sender_to_q("go")
+	time.sleep(0.1)
+	nan += 1
+	print(nan)
+	if ad.reader_from_q() == 'DEAD':
+		print('here')
+		ad.resurrection()
+
 

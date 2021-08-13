@@ -31,6 +31,15 @@ class Compass:
         
     def colibrating (self, max_iter):
         self.compass.callibration(max_iter)
+        
+    def average_ang(self, num):
+        all_angels = []
+        for i in range(num):
+            ang = self.my_angel()
+            all_angels.append(ang)
+        average = sum(all_angels)/num
+        return average 
+    
 ########################################################################
 
 def my_gps(checker):   
@@ -79,11 +88,13 @@ class Arduino:
     def __init__(self, bot = 9600, port = '/dev/ttyUSB0', timeout_1 = 1, dlin=4):
         self.ser = serial.Serial(port, bot, timeout=timeout_1)
         self.ser.flush()
+        #-------------------------------#
         self.TURN_RIGHT = '3'
         self.TURN_LEFT = '2'
         self.TURN_ZERO = '4'
         self.STOP = '0'
-        self.GO = '1'
+        self.GO = '1' 
+        #-------------------------------#
         for i in range(dlin):
             self.ser.write('9'.encode('ascii'))
             time.sleep(1)
@@ -93,9 +104,7 @@ class Arduino:
 
     def moving(self):
         """arduino controlling function (for start motion)"""
-        tm = time.time()
-        self.ser.write(self.GO.encode('ascii'))
-        print(time.time() - tm)
+        self.ser.write(self.GO.encode('ascii')) 
         print('ok')
 
     def turn_right(self):
@@ -114,14 +123,22 @@ class Arduino:
         
 class Arduino_send:
     
-    def __init__(self):
+    def __init__(self, timeout = 0.1):
+        self.timeout = timeout
         self.q = multiprocessing.Queue(maxsize=5)
         self.proc = multiprocessing.Process(target=self.sender_to_ar)
         self.proc.start()
-        time.sleep(1)
+        #time.sleep(1)
         
     def sender_to_ar(self):
         try:
+            #--------------------------#
+            turn_zero = 'turn_zero'
+            turn_left = 'turn_left'
+            turn_right = 'turn_right'
+            stop = 'stop'
+            go = 'go'
+            #--------------------------#    
             print(os.getpid())
             ard = Arduino(dlin=2)
             time.sleep(1)
@@ -129,30 +146,59 @@ class Arduino_send:
                 if self.q.empty() == False:
                     out = self.q.get()
                     print(out)
-                    if out == 'stop':
+                    if out == stop:
                         ard.stopper()
-                        time.sleep(0.5)
-                    elif out == 'go':
+                        time.sleep(self.timeout)
+                    elif out == go:
                         ard.moving()
-                        time.sleep(0.5)
-                    elif out == 'turn_left':
+                        time.sleep(self.timeout)
+                    elif out == turn_left:
                         ard.turn_left()
-                        time.sleep(0.5)
-                    elif out == 'turn_right':
+                        time.sleep(self.timeout)
+                    elif out == turn_right:
                         ard.turn_right()
-                        time.sleep(0.5)
-                    elif out == 'turn_zero':
+                        time.sleep(self.timeout)
+                    elif out == turn_zero:
                         ard.turn_zero()
-                        time.sleep(0.5)
+                        time.sleep(self.timeout)
         except:
-            print("problem")
+            print("DEAD PROC")
+            if self.q.empty():
+                self.q.put("DEAD")
+            
             
     def sender_to_q(self, info):
         """ @info - 'stop' or 'go' or 'turn_right' or 'turn_left' or 'turn_zero' """
         #print(self.q.empty())
         if self.q.empty():
             self.q.put(info)
+
                 
+    def reader_from_q(self):
+         if self.q.empty() == False:
+            return self.q.get()
+         else:
+            return None
+                    
+
+                
+    def resurrection(self, last=None):
+        """
+        1 -  this function has one optional param, 
+        which should be used for for resending last unmatched info.
+        2 - the function should be used only inside operator "if" whith 
+        condition - (Arduino_send.live_status == 'DEAD')""  
+        """
+        #print(666)
+        self.killer()
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.sender_to_ar)
+        self.proc.start()
+        time.sleep(1)
+        if (last != None):
+            self.sender_to_q(last)
+            
+         
     def killer(self):
         self.proc.terminate()
             
