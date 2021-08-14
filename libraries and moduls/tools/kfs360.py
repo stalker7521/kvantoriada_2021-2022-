@@ -34,3 +34,5 @@ class KFS360:
 		if self.State < -180:
 			self.State = self.State + 360
 
+for i in range(8):
+	print(1)

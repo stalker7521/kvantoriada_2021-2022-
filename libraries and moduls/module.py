@@ -8,7 +8,8 @@ import multiprocessing
 import os
 
 
-########################################################################
+################-Compass-##############################################
+
 class Compass:
 
     def __init__(self):
@@ -38,9 +39,57 @@ class Compass:
             ang = self.my_angel()
             all_angels.append(ang)
         average = sum(all_angels)/num
-        return average 
-    
-########################################################################
+        return average
+
+#################-Tools-###############################################
+
+def turn_chooser(myAngel, finishAngel):
+    mod = abs(myAngel - finishAngel)
+    if mod == 180:
+        return 'turn_right'
+    else:
+        if ((270 <= myAngel < 360) and (0 < finishAngel <= 90)) or ((270 <= finishAngel <= 360) and (0 < myAngel <= 90)):
+            if myAngel > finishAngel:
+                return 'turn_right'
+            else:
+                return 'turn_left'
+        elif ((315 <= myAngel <= 360) and (90 <= finishAngel <= 135)) or ((315 <= finishAngel <= 360) and (90 <= myAngel <= 135)):
+            if myAngel > finishAngel:
+                return 'turn_right'
+            else:
+                return 'turn_left'
+        elif ((225 <= myAngel <= 270) and (0 <= finishAngel <= 45)) or ((225 <= finishAngel <= 270) and (0 <= myAngel <= 45)):
+            if myAngel > finishAngel:
+                return 'turn_right'
+            else:
+                return 'turn_left'
+        else:
+            if myAngel > finishAngel:
+                return 'turn_left'
+            else:
+                return 'turn_right'
+
+def delay(now_dist, max_delay=50, min_delay=6, dist=10, maxx = 0.5):
+    """
+    :param now_dis: information about distance between goal-point and your-point (meters)
+    :param dist: global distance from which counting would be started (meters)
+    :param min_delay: minimum checking per minute
+    :param max_delay: maximum checking per minute
+    :return: in how many seconds will the next check be
+    """
+    if 1 < now_dist < dist:
+        tm_del = now_dist*(min_delay - max_delay)/dist + max_delay
+        tm_del = round(60/tm_del)
+        if tm_del == 0:
+            tm_del = maxx
+        return tm_del
+    elif 1 >= now_dist:
+        return maxx
+    else:
+        return min_delay
+
+
+##################-GPS-################################################
 
 def my_gps(checker):   
     """function for getting gps cords"""
@@ -81,7 +130,8 @@ def midl_cord(size, checker):
     mid_lat = sum(all_lat)/size
     mid_lon = sum(all_lon)/size
     return mid_lat, mid_lon
-########################################################################
+
+################-Arduino-##############################################
 
 class Arduino:
     
@@ -118,8 +168,7 @@ class Arduino:
     def turn_zero(self):
         """arduino controlling function (for returning wheels at the default state)"""
         self.ser.write(self.TURN_ZERO.encode('ascii'))
-        
-########################################################################
+
         
 class Arduino_send:
     
@@ -203,5 +252,3 @@ class Arduino_send:
         self.proc.terminate()
             
 ########################################################################
-        
-        
