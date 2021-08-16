@@ -35,10 +35,17 @@ class Compass:
         
     def average_ang(self, num):
         all_angels = []
+        buff = self.my_angel()
         for i in range(num):
             ang = self.my_angel()
-            all_angels.append(ang)
-        average = sum(all_angels)/num
+            if abs(buff - ang) < 90:
+                buff = ang
+                all_angels.append(ang)
+            else:
+                break
+        if len(all_angels) < (int(num * 90 / 100)):
+            return -1
+        average = sum(all_angels)/len(all_angels)
         return average
 
 
