@@ -1,20 +1,47 @@
 from Distance import Distance
-import serial
-import time
-import string
-import pynmea2
-from mpu9250 import *
 from module import *
 
-POINTS = [(43.400081,39.964251), (43.400585,39.963003), (43.399175,39.963610), (43.398381,39.963590), (43.398788,39.964401), (43.399534,39.964645), (43.400143,39.965468)]  # list with tuples (structure: (latitude, longitude)
-MISTAKE_LAT = 2                                                    # available mistake of the latitude
-MISTAKE_LON = 2                                                    # available mistake of the longitude
-MISTAKE_DEG = 2                                                    # available mistake of the degrees
-delay = 3
-
+POINT = (1, 1) #lat, lon
+FINISH = False
+INIT = []
+MISTAKE_LAT = 0.0001
+MISTAKE_LON = 0.0001
+MISTAKE_ROTATE = 2
 ########## Initialization ######################################################################################
 compass = Compass()
+arduino = Arduino_send()
 ###########################################################################################################
+while FINISH == False:
+    cords = my_gps(False) # delay - 1с
+    myLat = cords[0]
+    myLon = cords[1]
+    myAngel = compass.average_ang(600) # delay - 0.2c
+
+    print(myLat, ' - широта', myLon, ' - долгота', myAngel, ' - мой угол')
+
+    if ((myLat - MISTAKE_LAT) <= POINT[0] <= (myLat + MISTAKE_LAT)) and ((myLon - MISTAKE_LON) <= POINT[1] <= (myLon + MISTAKE_LON)):
+        FINISH = True
+    else:
+        dist_class = Distance(myLat, myLon, POINT[0], POINT[1])
+        length = dist_class.distance_main()
+        finishAngel = dist_class.angle()
+        direction = turn_chooser(myAngel, finishAngel)
+        print(direction)
+        flag = 0
+        while flag == 0:
+            if (finishAngel - MISTAKE_ROTATE) < myAngel < (finishAngel + MISTAKE_ROTATE):
+                flag = 1
+            else:
+                myAngel = compass.average_ang(600)
+                print(finishAngel, ' = ', myAngel)
+                arduino.sender_to_q(direction)
+
+        checker = delay(length)
+        time.sleep(checker)
+
+print()
+
+"""
 while True:
     weight = len(POINTS)
     if weight > 0:
@@ -44,7 +71,7 @@ while True:
                 print("ending of turning")
     stopper()
     print("end")
-
+"""
 
 
 

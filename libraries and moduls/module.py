@@ -41,6 +41,58 @@ class Compass:
         average = sum(all_angels)/num
         return average
 
+
+class Compass_Send:
+    def __init__(self):
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        # time.sleep(1)
+
+    def getter(self):
+        try:
+            print(os.getpid(), ' - compass process')
+            compass = Compass()
+            while True:
+                if self.q.empty() == False:
+                    out = self.q.get()
+                    if out == 'give':
+                        info = compass.average_ang(2000)
+                        if self.q.empty():
+                            self.q.put(info)
+
+        except:
+            print("DEAD PROC - compass")
+            if self.q.empty():
+                self.q.put("DEAD")
+
+    def sender_to_q(self, info):
+        if self.q.empty():
+            self.q.put(info)
+
+    def reader_from_q(self):
+        if self.q.empty() == False:
+            return self.q.get()
+        else:
+            return None
+
+    def resurrection(self, last=None):
+        """
+        1 -  this function has one optional param,
+        which should be used for for resending last unmatched info.
+        """
+        # print(666)
+        self.killer()
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        time.sleep(1)
+        if (last != None):
+            self.sender_to_q(last)
+
+    def killer(self):
+        self.proc.terminate()
+
 #################-Tools-###############################################
 
 def turn_chooser(myAngel, finishAngel):
@@ -154,8 +206,7 @@ class Arduino:
 
     def moving(self):
         """arduino controlling function (for start motion)"""
-        self.ser.write(self.GO.encode('ascii')) 
-        print('ok')
+        self.ser.write(self.GO.encode('ascii'))
 
     def turn_right(self):
         """arduino controlling function (for starting rotation)"""
@@ -188,7 +239,7 @@ class Arduino_send:
             stop = 'stop'
             go = 'go'
             #--------------------------#    
-            print(os.getpid())
+            print(os.getpid(), ' - arduino process')
             ard = Arduino(dlin=2)
             time.sleep(1)
             while True:
@@ -211,7 +262,7 @@ class Arduino_send:
                         ard.turn_zero()
                         time.sleep(self.timeout)
         except:
-            print("DEAD PROC")
+            print("DEAD PROC - arduino")
             if self.q.empty():
                 self.q.put("DEAD")
             
@@ -235,8 +286,6 @@ class Arduino_send:
         """
         1 -  this function has one optional param, 
         which should be used for for resending last unmatched info.
-        2 - the function should be used only inside operator "if" whith 
-        condition - (Arduino_send.live_status == 'DEAD')""  
         """
         #print(666)
         self.killer()
