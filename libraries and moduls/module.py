@@ -161,7 +161,7 @@ def my_gps(checker):
         newdata = ser.readline()
         if checker:
             print("her tebe, connection fail")
-        if newdata[0:6] == "$GNRMC":
+        if newdata[0:6] == "$GPRMC":
             newmsg = pynmea2.parse(newdata)
             lat = str(newmsg.latitude)
             lon = str(newmsg.longitude)

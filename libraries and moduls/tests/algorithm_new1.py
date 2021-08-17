@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+# -*- encoding: utf-8 -*-
 from Distance import Distance
 from module import *
 
-POINT = (1, 1) #lat, lon
+POINT = (56.84476, 60.59396) #lat, lon
 FINISH = False
 INIT = []
 MISTAKE_LAT = 0.0001
@@ -13,12 +13,15 @@ compass = Compass()
 arduino = Arduino_send()
 ###########################################################################################################
 while FINISH == False:
+    #arduino.sender_to_q('stop')
     cords = my_gps(False) # delay - 1с
     myLat = cords[0]
     myLon = cords[1]
-    myAngel = compass.average_ang(600) # delay - 0.2c
-
-    print(myLat, ' - широта', myLon, ' - долгота', myAngel, ' - мой угол')
+    myAngel = compass.average_ang(600) # delay - 0.3c
+    arduino.sender_to_q('go')
+    
+    print('go')
+    print(myLat, ' - lat', str(myLon), ' - lon', str(myAngel), ' - angel')
 
     if ((myLat - MISTAKE_LAT) <= POINT[0] <= (myLat + MISTAKE_LAT)) and ((myLon - MISTAKE_LON) <= POINT[1] <= (myLon + MISTAKE_LON)):
         FINISH = True
@@ -33,16 +36,25 @@ while FINISH == False:
             if (finishAngel - MISTAKE_ROTATE) < myAngel < (finishAngel + MISTAKE_ROTATE):
                 flag = 1
             else:
-                myAngel = compass.average_ang(600)
-                print(finishAngel, ' = ', myAngel)
+                myAngel = compass.average_ang(600)  # delay - 0.3c
                 arduino.sender_to_q(direction)
+                
+                print(finishAngel, ' = ', myAngel)
+                print(direction)
 
         checker = delay(length)
         time.sleep(checker)
+        
+arduino.sender_to_q('stop')
 
-print()
+print('stop')
+print('my cord - ', my_gps(False), ' point - ', POINT)
 
 """
+
+ad.sender_to_q("go")
+	print(nan)
+
 while True:
     weight = len(POINTS)
     if weight > 0:
