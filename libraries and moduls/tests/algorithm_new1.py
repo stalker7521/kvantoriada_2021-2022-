@@ -8,9 +8,17 @@ INIT = []
 MISTAKE_LAT = 0.0001
 MISTAKE_LON = 0.0001
 MISTAKE_ROTATE = 2
+flag = False
 ########## Initialization ######################################################################################
-compass = Compass()
-arduino = Arduino_send()
+
+while flag == False:
+    try:
+        compass = Compass()
+        arduino = Arduino_send()
+        flag = True
+    except:
+        flag = False
+
 ###########################################################################################################
 while FINISH == False:
     #arduino.sender_to_q('stop')
@@ -31,7 +39,7 @@ while FINISH == False:
         finishAngel = dist_class.angle()
         direction = turn_chooser(myAngel, finishAngel)
         print(direction)
-        flag = 0
+        flag = False
         while flag == 0:
             if (finishAngel - MISTAKE_ROTATE) < myAngel < (finishAngel + MISTAKE_ROTATE):
                 flag = 1
@@ -43,7 +51,7 @@ while FINISH == False:
                 print(direction)
 
         checker = delay(length)
-        time.sleep(checker)
+        time.sleep(checker) #todo (go) <-------------------------------
         
 arduino.sender_to_q('stop')
 

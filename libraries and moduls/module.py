@@ -30,9 +30,9 @@ class Compass:
             angel = 360 + angel
         return angel
         
-    def colibrating (self, max_iter):
+    def colibrating(self, max_iter):
         self.compass.callibration(max_iter)
-        
+
     def average_ang(self, num):
         all_angels = []
         buff = self.my_angel()
