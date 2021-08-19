@@ -72,6 +72,7 @@ while counter != GOAL:
                     print(direction)
                     # -------------------------------------------------------- #
             checker = delay(length)
+            arduino.sender_to_q('turn_zero')
             time.sleep(checker)  # todo (go) <-------------------------------
 
 print('stop')
