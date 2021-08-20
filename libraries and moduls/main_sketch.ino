@@ -58,7 +58,7 @@ void loop() {
        break;
   }
  }
- else:
+ else
   if (mySerial.available()){
     info = char(mySerial.read());
     switch (info){
