@@ -20,6 +20,7 @@ Servo servo;
 
 void setup() {
   Serial.begin(9600);
+  mySerial.begin(9600);
 
  for (int i = 4; i < 8; i++) {     
   pinMode(i, OUTPUT);
