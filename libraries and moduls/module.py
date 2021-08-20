@@ -149,6 +149,59 @@ def delay(now_dist, max_delay=50, min_delay=6, dist=10, maxx = 0.5):
 
 
 ##################-GPS-################################################
+class GPS:
+    def __init__(self):
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+
+    def getter(self):
+        cord = ()
+        try:
+            while True:
+                port = "/dev/ttyAMA0"
+                ser = serial.Serial(port, baudrate=9600, timeout=0.5)
+                dataout = pynmea2.NMEAStreamReader()
+                newdata = ser.readline()
+                if newdata[0:6] == "$GPRMC":  ## or GNRMC
+                    newmsg = pynmea2.parse(newdata)
+                    lat = str(newmsg.latitude)
+                    lon = str(newmsg.longitude)
+                    lat = float(lat[0:8])
+                    lon = float(lon[0:8])
+                    cord = (lat, lon)
+                if self.q.empty() == False:
+                    out = self.q.get()
+                    info = cord
+                    if self.q.empty():
+                        self.q.put(info)
+                else:
+                    pass
+        except:
+            print("DEAD PROC - GPS")
+            if self.q.empty():
+                self.q.put("DEAD")
+
+    def sender_to_q(self, info):
+        if self.q.empty():
+            self.q.put(info)
+
+    def reader_from_q(self):
+        if self.q.empty() == False:
+            return self.q.get()
+        else:
+            return None
+
+    def resurrection(self):
+        self.killer()
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        time.sleep(1)
+
+    def killer(self):
+        self.proc.terminate()
+
 
 def my_gps(checker):   
     """function for getting gps cords"""
@@ -161,7 +214,7 @@ def my_gps(checker):
         newdata = ser.readline()
         if checker:
             print("her tebe, connection fail")
-        if newdata[0:6] == "$GPRMC":
+        if newdata[0:6] == "$GPRMC":     ## or GNRMC
             newmsg = pynmea2.parse(newdata)
             lat = str(newmsg.latitude)
             lon = str(newmsg.longitude)
@@ -286,9 +339,9 @@ class Arduino_send:
             return self.q.get()
          else:
             return None
-                    
 
-                
+
+
     def resurrection(self, last=None):
         """
         1 -  this function has one optional param, 
