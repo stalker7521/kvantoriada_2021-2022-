@@ -248,11 +248,11 @@ class Arduino_send:
             #--------------------------#    
             print(os.getpid(), ' - arduino process')
             ard = Arduino(dlin=2)
-            time.sleep(1)
+            #time.sleep(1)
             while True:
                 if self.q.empty() == False:
                     out = self.q.get()
-                    print(out)
+                    print(out, ' - has been sanded')
                     if out == stop:
                         ard.stopper()
                         time.sleep(self.timeout)

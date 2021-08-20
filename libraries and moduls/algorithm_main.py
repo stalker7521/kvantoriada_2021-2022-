@@ -28,7 +28,8 @@ while flag == False:
         flag = True
     except:
         flag = False
-
+print('wait')
+time.sleep(5)
 ################################################################################################################
 while counter != GOAL:
     local_point = counter
