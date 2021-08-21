@@ -45,10 +45,10 @@ void loop() {
        primo();
        break;
      case '3':
-       leva();
+       right();
        break;
      case '2':
-       neva();
+       left();
        break;
      case '1':
        go();
@@ -94,12 +94,12 @@ void primo (){
   
 }
 
-void leva (){
+void right (){
   servo.write(115); 
   
 }
 
-void neva (){
+void left (){
     servo.write(65); 
 
 }
