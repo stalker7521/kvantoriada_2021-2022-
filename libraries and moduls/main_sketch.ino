@@ -44,10 +44,10 @@ void loop() {
      case '4':
        primo();
        break;
-     case '2':
+     case '3':
        leva();
        break;
-     case '3':
+     case '2':
        neva();
        break;
      case '1':
