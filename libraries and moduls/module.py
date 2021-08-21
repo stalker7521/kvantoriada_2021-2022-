@@ -48,58 +48,6 @@ class Compass:
         average = sum(all_angels)/len(all_angels)
         return average
 
-
-class Compass_Send:
-    def __init__(self):
-        self.q = multiprocessing.Queue(maxsize=5)
-        self.proc = multiprocessing.Process(target=self.getter)
-        self.proc.start()
-        # time.sleep(1)
-
-    def getter(self):
-        try:
-            print(os.getpid(), ' - compass process')
-            compass = Compass()
-            while True:
-                if self.q.empty() == False:
-                    out = self.q.get()
-                    if out == 'give':
-                        info = compass.average_ang(2000)
-                        if self.q.empty():
-                            self.q.put(info)
-
-        except:
-            print("DEAD PROC - compass")
-            if self.q.empty():
-                self.q.put("DEAD")
-
-    def sender_to_q(self, info):
-        if self.q.empty():
-            self.q.put(info)
-
-    def reader_from_q(self):
-        if self.q.empty() == False:
-            return self.q.get()
-        else:
-            return None
-
-    def resurrection(self, last=None):
-        """
-        1 -  this function has one optional param,
-        which should be used for for resending last unmatched info.
-        """
-        # print(666)
-        self.killer()
-        self.q = multiprocessing.Queue(maxsize=5)
-        self.proc = multiprocessing.Process(target=self.getter)
-        self.proc.start()
-        time.sleep(1)
-        if (last != None):
-            self.sender_to_q(last)
-
-    def killer(self):
-        self.proc.terminate()
-
 #################-Tools-###############################################
 
 def turn_chooser(myAngel, finishAngel):
@@ -149,59 +97,6 @@ def delay(now_dist, max_delay=50, min_delay=6, dist=10, maxx = 0.5):
 
 
 ##################-GPS-################################################
-class GPS:
-    def __init__(self):
-        self.q = multiprocessing.Queue(maxsize=5)
-        self.proc = multiprocessing.Process(target=self.getter)
-        self.proc.start()
-
-    def getter(self):
-        cord = ()
-        try:
-            while True:
-                port = "/dev/ttyAMA0"
-                ser = serial.Serial(port, baudrate=9600, timeout=0.5)
-                dataout = pynmea2.NMEAStreamReader()
-                newdata = ser.readline()
-                if newdata[0:6] == "$GPRMC":  ## or GNRMC
-                    newmsg = pynmea2.parse(newdata)
-                    lat = str(newmsg.latitude)
-                    lon = str(newmsg.longitude)
-                    lat = float(lat[0:8])
-                    lon = float(lon[0:8])
-                    cord = (lat, lon)
-                if self.q.empty() == False:
-                    out = self.q.get()
-                    info = cord
-                    if self.q.empty():
-                        self.q.put(info)
-                else:
-                    pass
-        except:
-            print("DEAD PROC - GPS")
-            if self.q.empty():
-                self.q.put("DEAD")
-
-    def sender_to_q(self, info):
-        if self.q.empty():
-            self.q.put(info)
-
-    def reader_from_q(self):
-        if self.q.empty() == False:
-            return self.q.get()
-        else:
-            return None
-
-    def resurrection(self):
-        self.killer()
-        self.q = multiprocessing.Queue(maxsize=5)
-        self.proc = multiprocessing.Process(target=self.getter)
-        self.proc.start()
-        time.sleep(1)
-
-    def killer(self):
-        self.proc.terminate()
-
 
 def my_gps(checker):   
     """function for getting gps cords"""
@@ -247,7 +142,7 @@ def midl_cord(size, checker):
 
 class Arduino:
     
-    def __init__(self, bot = 9600, port = '/dev/ttyUSB0', timeout_1 = 1, dlin=4):
+    def __init__(self, bot = 9600, port = '/dev/ttyACM0', timeout_1 = 1, dlin=4):
         self.ser = serial.Serial(port, bot, timeout=timeout_1)
         self.ser.flush()
         #-------------------------------#
@@ -361,3 +256,110 @@ class Arduino_send:
         self.proc.terminate()
             
 ########################################################################
+################### не используется из-за гонки потоков ################
+# создать схему тумблера с q.empty()
+class GPS:
+    def __init__(self):
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        time.sleep(1)
+
+    def getter(self):
+        cord = ()
+        try:
+            print(os.getpid(), ' - GPS process')
+            while True:
+                port = "/dev/ttyAMA0"
+                ser = serial.Serial(port, baudrate=9600, timeout=0.5)
+                dataout = pynmea2.NMEAStreamReader()
+                newdata = ser.readline()
+                if newdata[0:6] == "$GPRMC":  ## or GNRMC
+                    newmsg = pynmea2.parse(newdata)
+                    lat = str(newmsg.latitude)
+                    lon = str(newmsg.longitude)
+                    lat = float(lat[0:8])
+                    lon = float(lon[0:8])
+                    cord = (lat, lon)
+                if self.q.empty() == False:
+                    out = self.q.get()
+                    info = cord
+                    if self.q.empty():
+                        self.q.put(info)
+                else:
+                    pass
+        except:
+            print("DEAD PROC - GPS")
+            if self.q.empty():
+                self.q.put("DEAD")
+
+    def sender_to_q(self, info):
+        if self.q.empty():
+            self.q.put(info)
+
+    def reader_from_q(self):
+        if self.q.empty() == False:
+            return self.q.get()
+        else:
+            return None
+
+    def resurrection(self):
+        self.killer()
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        time.sleep(1)
+
+    def killer(self):
+        self.proc.terminate()
+
+class Compass_Send:
+    def __init__(self):
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        # time.sleep(1)
+
+    def getter(self):
+        try:
+            print(os.getpid(), ' - compass process')
+            compass = Compass()
+            while True:
+                if self.q.empty() == False:
+                    out = self.q.get()
+                    if out == 'give':
+                        info = compass.average_ang(2000)
+                        if self.q.empty():
+                            self.q.put(info)
+
+        except:
+            print("DEAD PROC - compass")
+            if self.q.empty():
+                self.q.put("DEAD")
+
+    def sender_to_q(self, info):
+        if self.q.empty():
+            self.q.put(info)
+
+    def reader_from_q(self):
+        if self.q.empty() == False:
+            return self.q.get()
+        else:
+            return None
+
+    def resurrection(self, last=None):
+        """
+        1 -  this function has one optional param,
+        which should be used for for resending last unmatched info.
+        """
+        # print(666)
+        self.killer()
+        self.q = multiprocessing.Queue(maxsize=5)
+        self.proc = multiprocessing.Process(target=self.getter)
+        self.proc.start()
+        time.sleep(1)
+        if (last != None):
+            self.sender_to_q(last)
+
+    def killer(self):
+        self.proc.terminate()

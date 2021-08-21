@@ -3,13 +3,13 @@ from Distance import Distance
 from module import *
 
 POINTS = [
-    (0, 0),
-    (1, 1),
-    (2, 2),
-    (3, 3),
-    (4, 4),
-    (5, 5),
-    (6, 6),
+    (56.84551, 60.59140),
+    #(1, 1),
+    #(2, 2),
+    #(3, 3),
+    #(4, 4),
+    #(5, 5),
+    #(6, 6),
 ]
 GOAL = len(POINTS)
 MISTAKE_LAT = 0.0001
@@ -28,8 +28,10 @@ while flag == False:
         flag = True
     except:
         flag = False
-print('wait')
-time.sleep(5)
+
+print('please wait')
+time.sleep(4)
+
 ################################################################################################################
 while counter != GOAL:
     local_point = counter
@@ -37,6 +39,7 @@ while counter != GOAL:
     pointLon = POINTS[counter][1]
     flag = False
     while flag == False:
+        #arduino.sender_to_q('turn_zero')
         cords = my_gps(False)  # delay - 1с
         myLat = cords[0]
         myLon = cords[1]
@@ -60,6 +63,7 @@ while counter != GOAL:
             direction = turn_chooser(myAngel, finishAngel)
             # -------------------------------------------------------------------- #
             print(direction)
+            arduino.sender_to_q(direction) # <----------------------------------------------<<<<<<
             # -------------------------------------------------------------------- #
             local_flag = False
             while local_flag == False:
@@ -67,14 +71,16 @@ while counter != GOAL:
                     local_flag = True
                 else:
                     myAngel = compass.average_ang(600)  # delay - 0.3c
+                    direction = turn_chooser(myAngel, finishAngel) # <----------------------------------------------<<<<<
                     arduino.sender_to_q(direction)
                     # -------------------------------------------------------- #
-                    print(finishAngel, ' = ', myAngel)
+                    print('direction', direction, ' >finishangel - ', finishAngel, ' = ', myAngel)
                     print(direction)
                     # -------------------------------------------------------- #
             checker = delay(length)
             arduino.sender_to_q('turn_zero')
             time.sleep(checker)  # todo (go) <-------------------------------
 
-print('stop')
+arduino.sender_to_q('stop') # <----------------------------------------------<<<<<
+print('stop >-------------------------------------------------------')
 print('my cord - ', my_gps(False), ' point - ', (pointLat, pointLon), 'number of the point - ', counter)
