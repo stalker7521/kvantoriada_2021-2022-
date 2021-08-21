@@ -3,29 +3,31 @@
 #define rx 8
 #define tx 9
 
-#define SPEED_1      5 
-#define DIR_1        4
-#define SPEED_2      6
-#define DIR_2        7
+byte ena = 3;
+byte in1 = 4;
+byte in2 = 5;
 
-int pwm_speed = 255;
+
 int in;
 char info;
 bool count = 0;
 
-SoftwareSerial mySerial = SoftwareSerial(rx, tx);
+//SoftwareSerial mySerial = SoftwareSerial(rx, tx);
 
 Servo servo;     
 
 
 void setup() {
   Serial.begin(9600);
-  mySerial.begin(9600);
+  //mySerial.begin(9600);
 
  for (int i = 4; i < 8; i++) {     
   pinMode(i, OUTPUT);
   }
-    
+
+  pinMode( ena, OUTPUT );
+  pinMode( in1, OUTPUT );
+  pinMode( in2, OUTPUT );
   
   pinMode(12, OUTPUT);
  
@@ -104,22 +106,20 @@ void neva (){
 
 
 void go (){
-  digitalWrite(DIR_1, LOW);
-  analogWrite(SPEED_1, 255);
-  digitalWrite(DIR_2, LOW);
-  analogWrite(SPEED_2, 255);
-  
+  analogWrite( ena, 255 );
+  digitalWrite( in1, HIGH  );
+  digitalWrite( in2, LOW );
 }
 
 void revers (){
-  digitalWrite(DIR_1, HIGH);
-  analogWrite(SPEED_1, 255);
-  digitalWrite(DIR_2, HIGH);
-  analogWrite(SPEED_2, 255);
+  analogWrite( ena, 255 );
+  digitalWrite( in1, LOW  );
+  digitalWrite( in2, HIGH );
   
 }
 
 void stopend (){
-   analogWrite(SPEED_1, 0);
-   analogWrite(SPEED_2, 0);
+  analogWrite( ena, 0 );
+  digitalWrite( in1, LOW  );
+  digitalWrite( in2, LOW );
 }
