@@ -1,4 +1,3 @@
-from mpu9250 import *
 from module import Compass
 import time
 

@@ -1,7 +1,4 @@
-from Distance import Distance
 import serial
-import time
-import string
 import pynmea2
 from mpu9250 import *
 import multiprocessing
