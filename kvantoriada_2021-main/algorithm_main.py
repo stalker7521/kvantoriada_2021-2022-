@@ -3,7 +3,7 @@ from Distance import Distance
 from module import *
 
 POINTS = [
-    (56.844438, 60.592231),
+    (56.84551, 60.59140),
     #(1, 1),
     #(2, 2),
     #(3, 3),
